@@ -37,6 +37,6 @@ install-commons: submodules
 	-cd ../../so-commons-library && $(MAKE) all
 
 submodules:
-	-cd git submodule init && git submodule update
+	-git submodule init && git submodule update
 
 .PHONY: all create-dirs clean submodules dependents install-deps install-cspec install-commons submodules

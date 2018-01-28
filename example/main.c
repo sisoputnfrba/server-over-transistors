@@ -1,7 +1,9 @@
 #include <sot/server.h>
 
 void handle(t_sot_parsed request, void(*writer)(char*)){
-    writer(request._raw);
+    char *resp = string_from_format("Hola! bienvenido a %s", request.endpoint);
+    writer(resp);
+    free(resp);
 }
 
 int main(){

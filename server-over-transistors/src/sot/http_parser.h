@@ -18,6 +18,10 @@
 #define HTTP_PARSER_H_
 
 	#include <stdio.h>
+	#include <stdlib.h>
+	#include <string.h>
+	#include <commons/string.h>
+
 	/**
 	 * Define los posibles verbos que entiende SOT
 	 */
@@ -29,6 +33,7 @@
 
 	typedef struct {
 		sot_verb_t verb;
+		char* endpoint;
 		char* _raw;
 	} t_sot_parsed;
 

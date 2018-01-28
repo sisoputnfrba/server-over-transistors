@@ -7,6 +7,6 @@ sudo resize2fs /dev/sda1
 echo Actualizando el Linux
 apt -y update
 
-apt -y install build-essential git lynx gdb
+apt -y install build-essential git lynx gdb valgrind
 
 update-locale LANG=en_US.UTF-8 LANGUAGE=en_US.UTF-8 LC_ALL=en_US.UTF-8

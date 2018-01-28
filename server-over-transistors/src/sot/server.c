@@ -3,6 +3,11 @@
 #define BACKLOG 5
 #define PACKAGESIZE 1024
 
+#define safe_call(x) if (x == -1) {\
+    perror(string_from_format("ERROR-%d", __LINE__));\
+    exit(1);\
+} 
+
 t_log* create_logger(t_log_level log_level){
 	char * file = tmpnam(NULL);
 	t_log* logger = log_create(tmpnam(NULL), "SOT-Server", true, log_level);
@@ -11,12 +16,16 @@ t_log* create_logger(t_log_level log_level){
 	return logger;
 }
 
+char* wrap_response(char* wrap_response){
+    return string_from_format("HTTP/1.0 200 OK\nContent-Type: text/html\nContent-Length: %d\n\n%s\n", string_length(wrap_response), wrap_response);
+}
+
 void run_server(t_sot_server_config config){
 	t_log* logger = create_logger(config.log_level);
 
-
 	struct addrinfo hints;
 	struct addrinfo *serverInfo;
+	int yes = 1;
 
 	memset(&hints, 0, sizeof(hints));
 	hints.ai_family = AF_UNSPEC;
@@ -28,11 +37,19 @@ void run_server(t_sot_server_config config){
 	int listenningSocket;
 	listenningSocket = socket(serverInfo->ai_family, serverInfo->ai_socktype, serverInfo->ai_protocol);
 
-	bind(listenningSocket,serverInfo->ai_addr, serverInfo->ai_addrlen);
+	safe_call(
+		setsockopt(listenningSocket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
+	)
+
+	safe_call(
+		bind(listenningSocket,serverInfo->ai_addr, serverInfo->ai_addrlen)
+	)
 	freeaddrinfo(serverInfo); 
 
 	log_info(logger, "Escuchar en el puerto %s", config.port);
-	listen(listenningSocket, BACKLOG);
+	safe_call(
+		listen(listenningSocket, BACKLOG)
+	)
 
 	struct sockaddr_in addr;
 	socklen_t addrlen = sizeof(addr);
@@ -45,11 +62,13 @@ void run_server(t_sot_server_config config){
 
 		void writter (char *message){
 			log_info(logger, "Enviando a %d: [%s]:%d", socketCliente, message, strlen(message));
-			send(socketCliente, message, strlen(message) + 1, 0);
+			char* response = wrap_response(message);
+			send(socketCliente, response, strlen(response) + 1, 0);
+			free(response);
 		}
 
 		int size = recv(socketCliente, (void*) package, PACKAGESIZE, 0);
-		log_info(logger, "Recivido a %d bytes de %d", size, socketCliente);
+		log_info(logger, "Reciviendo %d bytes de %d", size, socketCliente);
 		config.handler(http_parse(size, package), writter);
 
 		close(socketCliente);

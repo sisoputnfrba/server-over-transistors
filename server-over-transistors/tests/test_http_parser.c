@@ -21,7 +21,7 @@
 
 context (http_parser) {
 
-    describe ("parser") {
+    describe ("verb parser") {
 
         it ("should parse a GET request as such") {
             char * request = "GET / HTTP/1.0 ....";
@@ -37,6 +37,19 @@ context (http_parser) {
 
             
             should_int( parsed.verb ) be equal to(set_verb_POST);
+        } end
+
+    } end
+
+    
+    describe ("endpoint parser") {
+
+        it ("should parse an endpoint") {
+            char * request = "GET / HTTP/1.0 ....";
+            t_sot_parsed parsed = http_parse(strlen(request), request);
+
+        
+            should_string( parsed.endpoint ) be equal to("/");
         } end
 
     } end
