@@ -1,0 +1,1 @@
+web: LD_LIBRARY_PATH="server-over-transistors/src/build/:so-commons-library/src/build" example/build/example

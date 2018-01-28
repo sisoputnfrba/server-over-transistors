@@ -15,4 +15,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.network :forwarded_port, guest: 8080, host: 8080 # SOT server
 
   config.vm.provision :shell, path: 'provision/os_setup.sh', keep_color: true
+  config.vm.provision :shell, path: 'provision/install_heroku_cli.sh', keep_color: true
 end

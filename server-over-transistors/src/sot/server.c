@@ -17,7 +17,7 @@ t_log* create_logger(t_log_level log_level){
 }
 
 char* wrap_response(char* wrap_response){
-    return string_from_format("HTTP/1.0 200 OK\nContent-Type: text/html\nContent-Length: %d\n\n%s\n", string_length(wrap_response), wrap_response);
+    return string_from_format("HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nContent-Length: %d\r\nConnection: close\r\n\r\n%s", string_length(wrap_response), wrap_response);
 }
 
 void run_server(t_sot_server_config config){
@@ -63,14 +63,18 @@ void run_server(t_sot_server_config config){
 		void writter (char *message){
 			log_info(logger, "Enviando a %d: [%s]:%d", socketCliente, message, strlen(message));
 			char* response = wrap_response(message);
-			send(socketCliente, response, strlen(response) + 1, 0);
+			log_trace(logger, ">>> [%s]", response);
+			send(socketCliente, response, strlen(response), 0);
 			free(response);
 		}
 
 		int size = recv(socketCliente, (void*) package, PACKAGESIZE, 0);
 		log_info(logger, "Reciviendo %d bytes de %d", size, socketCliente);
+		log_trace(logger, "<<< [%s]", package);
+
 		config.handler(http_parse(size, package), writter);
 
+		shutdown (socketCliente, SHUT_RDWR);
 		close(socketCliente);
 	}
 	close(listenningSocket);
